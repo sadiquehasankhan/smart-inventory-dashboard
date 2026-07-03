@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SCM/OS &mdash; Smart Inventory &amp; Supply Chain Control Tower</title>
+
+<!-- Bootstrap 5 -->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/css/bootstrap.min.css" rel="stylesheet">
+<!-- Fonts -->
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@400;500;600;700&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<!-- Custom styles -->
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+<!-- ===================== SIDEBAR ===================== -->
+<aside class="scm-sidebar">
+  <div class="brand">
+    <span class="brand-mark">SC</span>
+    <div class="brand-text">
+      <strong>SCM/OS</strong>
+      <small>Control Tower</small>
+    </div>
+  </div>
+
+  <nav class="scm-nav">
+    <button class="nav-link active" data-page="dashboard">
+      <span class="nav-idx">01</span> Dashboard
+    </button>
+    <button class="nav-link" data-page="stock">
+      <span class="nav-idx">02</span> Stock Monitoring
+    </button>
+    <button class="nav-link" data-page="forecast">
+      <span class="nav-idx">03</span> Demand Forecast
+    </button>
+    <button class="nav-link" data-page="suppliers">
+      <span class="nav-idx">04</span> Suppliers
+    </button>
+    <button class="nav-link" data-page="alerts">
+      <span class="nav-idx">05</span> Alerts &amp; Reports
+    </button>
+  </nav>
+
+  <div class="sidebar-foot">
+    <div class="clock-label">SYSTEM TIME</div>
+    <div id="sysClock" class="clock-value">--:--:--</div>
+  </div>
+</aside>
+
+<!-- ===================== TOP TICKER ===================== -->
+<div class="scm-ticker">
+  <div class="ticker-tag">LIVE FEED</div>
+  <div class="ticker-track"><span id="tickerText">Initializing supply chain feed&hellip;</span></div>
+</div>
+
+<!-- ===================== MAIN ===================== -->
+<main class="scm-main">
+
+  <!-- ---------- PAGE 1: DASHBOARD ---------- -->
+  <section class="page page-dashboard active" id="dashboard">
+    <div class="page-watermark" aria-hidden="true"></div>
+    <header class="page-head">
+      <p class="eyebrow">Overview</p>
+      <h1>Network Dashboard</h1>
+      <p class="lede">A single manifest of stock health, forecast drift and supplier status across every node in your network.</p>
+    </header>
+
+    <div class="kpi-row">
+      <div class="kpi-card">
+        <span class="kpi-label">SKUs Tracked</span>
+        <span class="kpi-value" id="kpiSkus">1,248</span>
+        <span class="kpi-delta up">&#9650; 3.1%</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Stock Health</span>
+        <span class="kpi-value" id="kpiHealth">86%</span>
+        <span class="kpi-delta up">&#9650; 1.4%</span>
+      </div>
+      <div class="kpi-card">
+        <span class="kpi-label">Open Purchase Orders</span>
+        <span class="kpi-value">37</span>
+        <span class="kpi-delta down">&#9660; 5</span>
+      </div>
+      <div class="kpi-card critical">
+        <span class="kpi-label">Active Alerts</span>
+        <span class="kpi-value" id="kpiAlerts">4</span>
+        <span class="kpi-delta">Needs review</span>
+      </div>
+    </div>
+
+    <div class="dash-grid">
+      <div class="panel panel-chart">
+        <div class="panel-head">
+          <h2>Inbound vs Outbound Units &mdash; 14 Day</h2>
+        </div>
+        <canvas id="dashChart" height="220"></canvas>
+      </div>
+
+      <div class="panel panel-list">
+        <div class="panel-head">
+          <h2>Warehouse Nodes</h2>
+        </div>
+        <ul class="node-list">
+          <li><span class="node-dot ok"></span> Patna DC &mdash; <b>Healthy</b></li>
+          <li><span class="node-dot warn"></span> Delhi Hub &mdash; <b>Low Stock</b></li>
+          <li><span class="node-dot ok"></span> Chennai Port &mdash; <b>Healthy</b></li>
+          <li><span class="node-dot crit"></span> Pune Yard &mdash; <b>Critical</b></li>
+        </ul>
+        <button class="btn-industrial full" data-goto="stock">View Stock Detail</button>
+      </div>
+    </div>
+
+    <div class="quick-actions">
+      <button class="btn-industrial" data-goto="forecast">Run Demand Forecast</button>
+      <button class="btn-industrial" data-goto="suppliers">Contact Suppliers</button>
+      <button class="btn-industrial outline" data-goto="alerts">Review Alerts</button>
+    </div>
+
+    <footer class="page-footer">Invented &amp; Developed by <span class="credit-name">Sadique Hasan Khan</span> &nbsp;&middot;&nbsp; &copy; 2026 Sadique Hasan Khan / Codec Technologies. All Rights Reserved.</footer>
+  </section>
+
+  <!-- ---------- PAGE 2: STOCK MONITORING ---------- -->
+  <section class="page page-stock" id="stock">
+    <div class="page-watermark" aria-hidden="true"></div>
+    <header class="page-head">
+      <p class="eyebrow">Inventory</p>
+      <h1>Stock Level Monitoring</h1>
+      <p class="lede">Live counts per SKU. Filter by status, then push a restock request straight from the manifest.</p>
+    </header>
+
+    <div class="filter-row">
+      <button class="chip active" data-filter="all">All</button>
+      <button class="chip" data-filter="ok">Healthy</button>
+      <button class="chip" data-filter="low">Low Stock</button>
+      <button class="chip" data-filter="critical">Critical</button>
+    </div>
+
+    <div class="panel table-panel">
+      <table class="manifest-table" id="stockTable">
+        <thead>
+          <tr>
+            <th>SKU</th><th>Item</th><th>Warehouse</th><th>Units on Hand</th><th>Reorder Point</th><th>Status</th><th></th>
+          </tr>
+        </thead>
+        <tbody id="stockTableBody"><!-- rows injected by script.js --></tbody>
+      </table>
+    </div>
+
+    <footer class="page-footer">Invented &amp; Developed by <span class="credit-name">Sadique Hasan Khan</span> &nbsp;&middot;&nbsp; &copy; 2026 Sadique Hasan Khan / Codec Technologies. All Rights Reserved.</footer>
+  </section>
+
+  <!-- ---------- PAGE 3: DEMAND FORECAST ---------- -->
+  <section class="page page-forecast" id="forecast">
+    <div class="page-watermark" aria-hidden="true"></div>
+    <header class="page-head">
+      <p class="eyebrow">Planning</p>
+      <h1>Demand Forecasting</h1>
+      <p class="lede">Projected demand by horizon, modeled from trailing sales velocity. Switch horizons to redraw the curve.</p>
+    </header>
+
+    <div class="filter-row">
+      <button class="chip active" data-range="7">7 Days</button>
+      <button class="chip" data-range="30">30 Days</button>
+      <button class="chip" data-range="90">90 Days</button>
+    </div>
+
+    <div class="panel panel-chart">
+      <div class="panel-head">
+        <h2 id="forecastTitle">Projected Demand &mdash; Next 7 Days</h2>
+      </div>
+      <canvas id="forecastChart" height="240"></canvas>
+    </div>
+
+    <div class="panel table-panel">
+      <table class="manifest-table" id="forecastTable">
+        <thead>
+          <tr><th>Item</th><th>Current Velocity /day</th><th>Projected Demand</th><th>Recommended Order</th></tr>
+        </thead>
+        <tbody id="forecastTableBody"></tbody>
+      </table>
+    </div>
+
+    <footer class="page-footer">Invented &amp; Developed by <span class="credit-name">Sadique Hasan Khan</span> &nbsp;&middot;&nbsp; &copy; 2026 Sadique Hasan Khan / Codec Technologies. All Rights Reserved.</footer>
+  </section>
+
+  <!-- ---------- PAGE 4: SUPPLIERS ---------- -->
+  <section class="page page-suppliers" id="suppliers">
+    <div class="page-watermark" aria-hidden="true"></div>
+    <header class="page-head">
+      <p class="eyebrow">Procurement</p>
+      <h1>Supplier Management</h1>
+      <p class="lede">Every vendor on file, their lead time and reliability score. Add a new supplier without leaving the page.</p>
+    </header>
+
+    <div class="quick-actions">
+      <button class="btn-industrial" id="toggleSupplierForm">+ Add Supplier</button>
+    </div>
+
+    <div class="panel add-supplier-panel" id="supplierForm">
+      <div class="panel-head"><h2>New Supplier Intake</h2></div>
+      <form id="supplierAddForm">
+        <div class="row g-3">
+          <div class="col-md-4"><input required class="form-control industrial-input" placeholder="Company Name" id="supName"></div>
+          <div class="col-md-4"><input required class="form-control industrial-input" placeholder="Primary Category" id="supCategory"></div>
+          <div class="col-md-4"><input required type="number" min="1" class="form-control industrial-input" placeholder="Lead Time (days)" id="supLead"></div>
+        </div>
+        <button type="submit" class="btn-industrial mt-3">Save Supplier</button>
+      </form>
+    </div>
+
+    <div class="supplier-grid" id="supplierGrid"><!-- cards injected by script.js --></div>
+
+    <footer class="page-footer">Invented &amp; Developed by <span class="credit-name">Sadique Hasan Khan</span> &nbsp;&middot;&nbsp; &copy; 2026 Sadique Hasan Khan / Codec Technologies. All Rights Reserved.</footer>
+  </section>
+
+  <!-- ---------- PAGE 5: ALERTS & REPORTS ---------- -->
+  <section class="page page-alerts" id="alerts">
+    <div class="page-watermark" aria-hidden="true"></div>
+    <header class="page-head">
+      <p class="eyebrow">Exceptions</p>
+      <h1>Alerts &amp; Reports</h1>
+      <p class="lede">Automated flags across the network. Resolve them here, or export the current manifest as a report.</p>
+    </header>
+
+    <div class="quick-actions">
+      <button class="btn-industrial" id="generateReportBtn">Generate CSV Report</button>
+      <span class="report-status" id="reportStatus"></span>
+    </div>
+
+    <div class="panel table-panel">
+      <ul class="alert-list" id="alertList"><!-- items injected by script.js --></ul>
+    </div>
+
+    <footer class="page-footer">Invented &amp; Developed by <span class="credit-name">Sadique Hasan Khan</span> &nbsp;&middot;&nbsp; &copy; 2026 Sadique Hasan Khan / Codec Technologies. All Rights Reserved.</footer>
+  </section>
+
+</main>
+
+<!-- Bootstrap bundle (used for utility behaviors only) -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.3/js/bootstrap.bundle.min.js"></script>
+<script src="script.js"></script>
+</body>
+</html>
